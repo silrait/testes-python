@@ -1,5 +1,7 @@
 import sys
 
+from src.leilao.excecoes import LanceInvalido
+
 
 class Usuario:
 
@@ -16,8 +18,8 @@ class Usuario:
         return self.__nome
 
     def propoe_lance(self, leilao, valor):
-        if valor > self.__carteira:
-            raise ValueError('Não pode propor lance maior que o valor da carteira')
+        if not self.__valor_e_valido(valor):
+            raise LanceInvalido('Não pode propor lance maior que o valor da carteira')
 
         lance = Lance(self, valor)
         leilao.propoe(lance)
@@ -25,6 +27,9 @@ class Usuario:
 
     def __str__(self):
         return f'Usuario [nome = {self.__nome}]'
+
+    def __valor_e_valido(self, valor):
+        return valor <= self.__carteira
 
 
 class Lance:
@@ -67,14 +72,31 @@ class Leilao:
         return len(self.__lances)
 
     def propoe(self, lance: Lance):
-        if not self.__lances or self.__lances[-1].usuario != lance.usuario and lance.valor > self.__lances[-1].valor:
-            if (lance.valor > self.maior_lance):
-                self.__maior_lance = lance.valor
-            if (lance.valor < self.menor_lance):
+        if self.__lance_e_valido(lance):
+            if not self.__tem_lances():
                 self.__menor_lance = lance.valor
 
+            self.__maior_lance = lance.valor
+
             self.__lances.append(lance)
-        else:
-            raise ValueError('Erro ao propor lance')
+
+    def __lance_e_valido(self, lance):
+        return not self.__tem_lances() or (self.__usuarios_diferentes(lance) and
+                                           self.__valor_e_maior_que_lance_anterior(lance))
+
+    def __usuarios_diferentes(self, lance):
+        if self.__lances[-1].usuario != lance.usuario:
+            return True
+
+        raise LanceInvalido('O mesmo usuário não pode dar dois lances seguidos')
+
+    def __tem_lances(self):
+        return self.__lances
+
+    def __valor_e_maior_que_lance_anterior(self, lance):
+        if lance.valor > self.__lances[-1].valor:
+            return True
+
+        raise LanceInvalido('O valor do lance deve ser maior que o anterior')
 
 
