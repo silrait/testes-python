@@ -12,7 +12,3 @@ leilao.lances.append(lance_do_yuri)
 leilao.lances.append(lance_do_gui)
 
 print(leilao)
-
-avaliador = Avaliador()
-avaliador.avalia(leilao)
-print(avaliador)
