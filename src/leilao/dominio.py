@@ -3,12 +3,25 @@ import sys
 
 class Usuario:
 
-    def __init__(self, nome):
+    def __init__(self, nome, carteira):
         self.__nome = nome
+        self.__carteira = carteira
+
+    @property
+    def carteira(self):
+        return self.__carteira
 
     @property
     def nome(self):
         return self.__nome
+
+    def propoe_lance(self, leilao, valor):
+        if valor > self.__carteira:
+            raise ValueError('Não pode propor lance maior que o valor da carteira')
+
+        lance = Lance(self, valor)
+        leilao.propoe(lance)
+        self.__carteira -= valor
 
     def __str__(self):
         return f'Usuario [nome = {self.__nome}]'
